@@ -1,0 +1,86 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CharController : MonoBehaviour
+{
+
+    //mouse variables (looking around)
+    public float mouseSensitivity, maxRotationAngle;
+    private bool atMaxRotationAngle;
+    private Vector3 mouseInput = Vector3.zero;
+
+    //movement variables (wasd)
+    private Vector3 moveDirection = Vector3.zero;
+    public float walkSpeed, runMultiplier, runMultiplierHolder, gravity, jumpSpeed;
+    CharacterController controller;
+
+
+    private void Start()
+    {
+        controller = GetComponent<CharacterController>();
+
+    }
+    void Update()
+    {
+        lookAround();
+        moveAround();
+        lockCursor();
+
+    }
+
+    private void lookAround()
+    {
+        mouseInput = new Vector3(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X"), 0);
+
+        //limit rotation on X axis to +/- maxRotationAngle
+        atMaxRotationAngle = (transform.eulerAngles.x < 360 - maxRotationAngle && transform.eulerAngles.x > 180 && mouseInput.x < 0) || (transform.eulerAngles.x >= maxRotationAngle && transform.eulerAngles.x <= 180 && mouseInput.x > 0);
+        if (atMaxRotationAngle)
+        {
+            mouseInput.x = 0;
+        }
+
+        transform.Rotate(mouseInput * mouseSensitivity);
+
+        //lock z rotation
+        transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0);
+    }
+
+    private void moveAround()
+    {
+        if (controller.isGrounded) //if player is on the ground
+        {
+            // move direction vector from user input (wasd)
+            moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
+
+            //if Shift key held activate running speed multiplier
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                runMultiplierHolder = runMultiplier;
+            }
+            else runMultiplierHolder = 1;
+
+            moveDirection *= walkSpeed * runMultiplierHolder;
+            // Move the player
+            controller.Move(transform.localRotation * moveDirection * Time.deltaTime);
+
+            //if jumping add Y velocity
+            if (Input.GetButton("Jump"))
+            {
+                moveDirection.y = jumpSpeed;
+            }
+        }
+        moveDirection.y = 0;
+
+        //apply gravity
+        controller.Move(new Vector3(0, moveDirection.y-gravity, 0) * Time.deltaTime);
+    }
+
+    private void lockCursor()
+    {
+        if (Input.GetKey(KeyCode.Escape))
+            Screen.lockCursor = false;
+        else
+            Screen.lockCursor = true;
+    }
+}
