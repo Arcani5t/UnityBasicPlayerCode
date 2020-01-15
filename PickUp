@@ -1,0 +1,30 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PickUp : MonoBehaviour
+{
+    public Transform theDestination;
+    public Transform thePlayer;
+    private float distance;
+    public float maxGrabDistance;
+    private void OnMouseDown()
+    {
+
+        distance = Vector3.Distance(thePlayer.position, transform.position);
+        if (distance < maxGrabDistance)
+        {
+            GetComponent<Rigidbody>().useGravity = false;
+            theDestination.localPosition = new Vector3(theDestination.localPosition.x, theDestination.localPosition.y, distance);
+            this.transform.position = theDestination.position;
+            this.transform.parent = GameObject.Find("Destination").transform;
+        }
+    }
+
+    private void OnMouseUp()
+    {
+            this.transform.parent = null;
+            GetComponent<Rigidbody>().useGravity = true;
+            itemGrabbed = false;
+    }
+}
