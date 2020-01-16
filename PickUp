@@ -25,6 +25,5 @@ public class PickUp : MonoBehaviour
     {
             this.transform.parent = null;
             GetComponent<Rigidbody>().useGravity = true;
-            itemGrabbed = false;
     }
 }
